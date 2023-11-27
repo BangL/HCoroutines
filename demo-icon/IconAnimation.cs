@@ -1,9 +1,9 @@
 namespace HCoroutines.Samples.IconDemo;
 
-using Godot;
 using System.Collections;
-using HCoroutines;
 using System.Threading.Tasks;
+using Godot;
+using HCoroutines;
 
 public partial class IconAnimation : Node2D {
     public override void _Ready() {

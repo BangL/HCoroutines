@@ -1,72 +1,62 @@
+namespace HCoroutines;
+
 using System.Threading.Tasks;
 
-namespace HCoroutines
-{
-    /// <summary>
-    /// A coroutine that waits until an asynchronous task has been completed.
-    /// If the coroutine is killed before completion, the async task
-    /// will currently *not* be canceled.
-    /// </summary>
-    public class AwaitCoroutine<T> : CoroutineBase
-    {
-        public readonly Task<T> Task;
+/// <summary>
+/// A coroutine that waits until an asynchronous task has been completed.
+/// If the coroutine is killed before completion, the async task
+/// will currently *not* be canceled.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public class AwaitCoroutine<T> : CoroutineBase {
+    public Task<T> Task { get; }
 
-        public AwaitCoroutine(Task<T> task)
-        {
-            this.Task = task;
-        }
+    public AwaitCoroutine(Task<T> task) {
+        Task = task;
+    }
 
-        private void TryEnd()
-        {
-            if (Task.IsCompleted)
-            {
-                Kill();
-            }
-        }
-
-        public override void OnEnter()
-        {
-            TryEnd();
-            if (isAlive) ResumeUpdates();
-        }
-
-        public override void Update()
-        {
-            TryEnd();
+    private void TryEnd() {
+        if (Task.IsCompleted) {
+            Kill();
         }
     }
 
-    /// <summary>
-    /// A coroutine that waits until an asynchronous task has been completed.
-    /// If the coroutine is killed before completion, the async task
-    /// will currently *not* be canceled.
-    /// </summary>
-    public class AwaitCoroutine : CoroutineBase
-    {
-        public readonly Task Task;
-
-        public AwaitCoroutine(Task task)
-        {
-            this.Task = task;
+    public override void OnEnter() {
+        TryEnd();
+        if (IsAlive) {
+            ResumeUpdates();
         }
+    }
 
-        private void TryEnd()
-        {
-            if (Task.IsCompleted)
-            {
-                Kill();
-            }
-        }
+    public override void Update() {
+        TryEnd();
+    }
+}
 
-        public override void OnEnter()
-        {
-            base.OnEnter();
-            TryEnd();
-        }
+/// <summary>
+/// A coroutine that waits until an asynchronous task has been completed.
+/// If the coroutine is killed before completion, the async task
+/// will currently *not* be canceled.
+/// </summary>
+public class AwaitCoroutine : CoroutineBase {
+    public Task Task { get; }
 
-        public override void Update()
-        {
-            TryEnd();
+    public AwaitCoroutine(Task task) {
+        Task = task;
+    }
+
+    private void TryEnd() {
+        if (Task.IsCompleted) {
+            Kill();
         }
+    }
+
+    public override void OnEnter() {
+        base.OnEnter();
+        TryEnd();
+    }
+
+    public override void Update() {
+        TryEnd();
     }
 }

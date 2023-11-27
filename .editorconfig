@@ -255,3 +255,4 @@ csharp_preserve_single_line_statements = false
 csharp_preserve_single_line_blocks = true
 
 csharp_style_namespace_declarations = file_scoped
+dotnet_style_namespace_match_folder = false

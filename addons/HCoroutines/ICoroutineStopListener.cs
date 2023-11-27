@@ -1,7 +1,5 @@
-namespace HCoroutines
-{
-    public interface ICoroutineStopListener
-    {
-        void OnChildStopped(CoroutineBase coroutine);
-    }
+namespace HCoroutines;
+
+public interface ICoroutineStopListener {
+    void OnChildStopped(CoroutineBase child);
 }

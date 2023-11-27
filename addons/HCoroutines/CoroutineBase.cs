@@ -1,164 +1,143 @@
-using Godot;
+namespace HCoroutines;
+
 using System;
+using Godot;
 
-namespace HCoroutines
-{
+/// <summary>
+/// Base class of all coroutines that allows for pausing / resuming / killing / ... the coroutine.
+/// It is also responsible for managing the hierarchical structure and organization
+/// of coroutine nodes.
+/// The coroutines themselves act like a doubly linked list, so that
+/// the list of children can be efficiently managed and even modified during iteration.
+/// </summary>
+public class CoroutineBase : ICoroutineStopListener {
+    protected ICoroutineStopListener _stopListener;
+    internal CoroutineManager Manager { get; set; }
+
+    protected CoroutineBase _firstChild, _lastChild;
+    protected CoroutineBase _previousSibling, _nextSibling;
+
+    public bool IsAlive { get; private set; } = true;
+    public bool IsPlaying { get; private set; }
+
+    public void StartCoroutine(CoroutineBase coroutine) {
+        coroutine._stopListener = this;
+        coroutine.Manager = Manager;
+
+        AddChild(coroutine);
+        coroutine.OnEnter();
+    }
+
     /// <summary>
-    /// Base class of all coroutines that allows for pausing / resuming / killing / ... the coroutine.
-    /// It is also responsible for managing the hierarchical structure and organisation
-    /// of coroutine nodes.
-    /// The coroutines themselves act like a doubly linked list, so that
-    /// the list of children can be efficiently managed and even modified during iteration.
+    /// Called when the coroutine starts.
     /// </summary>
-    public class CoroutineBase : ICoroutineStopListener
-    {
-        public CoroutineManager manager;
-        public ICoroutineStopListener stopListener;
+    public virtual void OnEnter() {
+        ResumeUpdates();
+    }
 
-        protected CoroutineBase firstChild, lastChild;
-        protected CoroutineBase previousSibling, nextSibling;
+    /// <summary>
+    /// Called every frame if the coroutine is playing.
+    /// </summary>
+    public virtual void Update() { }
 
-        public bool isAlive = true;
-        public bool isPlaying = false;
+    /// <summary>
+    /// Called when the coroutine is killed.
+    /// </summary>
+    public virtual void OnExit() { }
 
-        public void StartCoroutine(CoroutineBase coroutine)
-        {
-            coroutine.stopListener = this;
-            coroutine.manager = manager;
-
-            AddChild(coroutine);
-            coroutine.OnEnter();
+    /// <summary>
+    /// Starts playing this coroutine, meaning that it will receive Update() calls
+    /// each frame. This is independent of the child coroutines.
+    /// This method only works if the coroutine is still alive.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void ResumeUpdates() {
+        if (!IsAlive) {
+            throw new InvalidOperationException("Cannot resume updates on dead coroutine.");
         }
 
-        /// <summary>
-        /// Called when the coroutine starts.
-        /// </summary>
-        public virtual void OnEnter()
-        {
-            ResumeUpdates();
+        IsPlaying = true;
+        Manager.ActivateCoroutine(this);
+    }
+
+    /// <summary>
+    /// Stops giving the coroutine Update() calls each frame.
+    /// This is independent of the child coroutines.
+    /// </summary>
+    public void PauseUpdates() {
+        IsPlaying = false;
+        Manager.DeactivateCoroutine(this);
+    }
+
+    public virtual void OnChildStopped(CoroutineBase child) {
+        // If the parent coroutine is dead, then there is no reason to
+        // manually remove the child coroutines
+        if (IsAlive) {
+            RemoveChild(child);
+        }
+    }
+
+    /// <summary>
+    /// Kills this coroutine and all child coroutines that were started using
+    /// StartCoroutine(...) on this coroutine.
+    /// </summary>
+    public void Kill() {
+        if (!IsAlive) {
+            return;
         }
 
-        /// <summary>
-        /// Called every frame if the coroutine is playing.
-        /// </summary>
-        public virtual void Update() { }
-
-        /// <summary>
-        /// Called when the coroutine is killed.
-        /// </summary>
-        public virtual void OnExit() { }
-
-        /// <summary>
-        /// Starts playing this coroutine, meaning that it will receive Update() calls
-        /// each frame. This is independent of the child coroutines.
-        /// This method only works if the coroutine is still alive.
-        /// </summary>
-        public void ResumeUpdates()
-        {
-            if (!isAlive)
-            {
-                throw new InvalidOperationException("Cannot resume updates on dead coroutine.");
-            }
-
-            isPlaying = true;
-            manager.ActivateCoroutine(this);
+        try {
+            OnExit();
+        } catch (Exception e) {
+            GD.PrintErr(e.ToString());
         }
 
-        /// <summary>
-        /// Stops giving the coroutine Update() calls each frame.
-        /// This is independent of the child coroutines.
-        /// </summary>
-        public void PauseUpdates()
-        {
-            isPlaying = false;
-            manager.DeactivateCoroutine(this);
+        IsAlive = false;
+        Manager.DeactivateCoroutine(this);
+
+        CoroutineBase child = _firstChild;
+        while (child != null) {
+            child.Kill();
+            child = child._nextSibling;
         }
 
-        public virtual void OnChildStopped(CoroutineBase child)
-        {
-            // If the parent coroutine is dead, then there is no reason to
-            // manually remove the child coroutines
-            if (isAlive)
-            {
-                RemoveChild(child);
-            }
+        _stopListener?.OnChildStopped(this);
+    }
+
+    /// <summary>
+    /// Adds a coroutine as a child.
+    /// </summary>
+    /// <param name="coroutine"></param>
+    protected void AddChild(CoroutineBase coroutine) {
+        if (_firstChild == null) {
+            _firstChild = coroutine;
+            _lastChild = coroutine;
+        } else {
+            _lastChild._nextSibling = coroutine;
+            coroutine._previousSibling = _lastChild;
+            _lastChild = coroutine;
+        }
+    }
+
+    /// <summary>
+    /// Removes a child from the list of child coroutines.
+    /// </summary>
+    /// <param name="coroutine"></param>
+    protected void RemoveChild(CoroutineBase coroutine) {
+        if (coroutine._previousSibling != null) {
+            coroutine._previousSibling._nextSibling = coroutine._nextSibling;
         }
 
-        /// <summary>
-        /// Kills this coroutine and all child coroutines that were started using
-        /// StartCoroutine(...) on this coroutine.
-        /// </summary>
-        public void Kill()
-        {
-            if (!isAlive)
-            {
-                return;
-            }
-
-            try
-            {
-                OnExit();
-            }
-            catch (Exception e)
-            {
-                GD.PrintErr(e.ToString());
-            }
-
-            isAlive = false;
-            manager.DeactivateCoroutine(this);
-
-            CoroutineBase child = firstChild;
-            while (child != null)
-            {
-                child.Kill();
-                child = child.nextSibling;
-            }
-
-            stopListener?.OnChildStopped(this);
+        if (coroutine._nextSibling != null) {
+            coroutine._nextSibling._previousSibling = coroutine._previousSibling;
         }
 
-        /// <summary>
-        /// Adds a coroutine as a child.
-        /// </summary>
-        protected void AddChild(CoroutineBase coroutine)
-        {
-            if (firstChild == null)
-            {
-                firstChild = coroutine;
-                lastChild = coroutine;
-            }
-            else
-            {
-                lastChild.nextSibling = coroutine;
-                coroutine.previousSibling = lastChild;
-                lastChild = coroutine;
-            }
+        if (_firstChild == coroutine) {
+            _firstChild = coroutine._nextSibling;
         }
 
-        /// <summary>
-        /// Removes a child from the list of child coroutines.
-        /// </summary>
-        protected void RemoveChild(CoroutineBase coroutine)
-        {
-            if (coroutine.previousSibling != null)
-            {
-                coroutine.previousSibling.nextSibling = coroutine.nextSibling;
-            }
-
-            if (coroutine.nextSibling != null)
-            {
-                coroutine.nextSibling.previousSibling = coroutine.previousSibling;
-            }
-
-            if (firstChild == coroutine)
-            {
-                firstChild = coroutine.nextSibling;
-            }
-
-            if (lastChild == coroutine)
-            {
-                lastChild = coroutine.previousSibling;
-            }
+        if (_lastChild == coroutine) {
+            _lastChild = coroutine._previousSibling;
         }
     }
 }

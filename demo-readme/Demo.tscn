@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://by8p2smi0i14a"]
 
-[ext_resource type="Script" path="res://demo-readme/DemoReadme.cs" id="1_nrytw"]
+[ext_resource type="Script" path="res://demo-readme/Demo.cs" id="1_nrytw"]
 [ext_resource type="Texture2D" uid="uid://b51hppm0lr3u4" path="res://Pixel.png" id="2_welts"]
 
 [node name="Main" type="Node2D"]

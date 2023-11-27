@@ -1,43 +1,34 @@
-namespace HCoroutines
-{
-    /// <summary>
-    /// Runs multiple coroutines one after another. Waits until the first
-    /// one has finished before starting the second one, ...
-    /// </summary>
-    public class SequentialCoroutine : CoroutineBase
-    {
-        private CoroutineBase[] coroutines;
-        private int idx = 0;
+namespace HCoroutines;
 
-        public SequentialCoroutine(params CoroutineBase[] coroutines)
-        {
-            this.coroutines = coroutines;
+/// <summary>
+/// Runs multiple coroutines one after another. Waits until the first
+/// one has finished before starting the second one, ...
+/// </summary>
+public class SequentialCoroutine : CoroutineBase {
+    private readonly CoroutineBase[] _coroutines;
+    private int _idx;
+
+    public SequentialCoroutine(params CoroutineBase[] coroutines) {
+        _coroutines = coroutines;
+    }
+
+    public override void OnEnter() {
+        if (_coroutines.Length == 0) {
+            Kill();
+            return;
         }
 
-        public override void OnEnter()
-        {
-            if (coroutines.Length == 0)
-            {
-                Kill();
-                return;
-            }
+        StartCoroutine(_coroutines[0]);
+    }
 
-            StartCoroutine(coroutines[0]);
-        }
+    public override void OnChildStopped(CoroutineBase child) {
+        base.OnChildStopped(child);
 
-        public override void OnChildStopped(CoroutineBase child)
-        {
-            base.OnChildStopped(child);
-
-            idx += 1;
-            if (idx < coroutines.Length)
-            {
-                StartCoroutine(coroutines[idx]);
-            }
-            else
-            {
-                Kill();
-            }
+        _idx++;
+        if (_idx < _coroutines.Length) {
+            StartCoroutine(_coroutines[_idx]);
+        } else {
+            Kill();
         }
     }
 }

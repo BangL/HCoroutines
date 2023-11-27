@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="HCoroutines"
-config/version="2.0.0"
+config/version="2.0.1"
 config/features=PackedStringArray("4.2", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 

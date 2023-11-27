@@ -1,128 +1,132 @@
-using Godot;
+// Hierarchical Coroutines v2.0.1 for Godot
+// by @Inspiaaa, @BangL
+
+namespace HCoroutines;
+
 using System;
 using System.Collections;
 using System.Threading.Tasks;
+using Godot;
 
-// Hierarchical Coroutines v1.0 for Godot
-// by @Inspiaaa
+/// <summary>
+/// Class that allows for easy access to the standard coroutine types.
+/// </summary>
+public static class Co {
+    private static Coroutine[] GetCoroutines(IEnumerator[] enumerators) {
+        Coroutine[] coroutines = new Coroutine[enumerators.Length];
 
-namespace HCoroutines
-{
-    /// <summary>
-    /// Class that allows for easy access to the standard coroutine types.
-    /// </summary>
-    public static class Co
-    {
-        private static Coroutine[] GetCoroutines(IEnumerator[] enumerators)
-        {
-            Coroutine[] coroutines = new Coroutine[enumerators.Length];
-
-            for (int i = 0; i < enumerators.Length; i++)
-            {
-                coroutines[i] = new Coroutine(enumerators[i]);
-            }
-
-            return coroutines;
+        for (int i = 0; i < enumerators.Length; i++) {
+            coroutines[i] = new Coroutine(enumerators[i]);
         }
 
-        public static float DeltaTime => CoroutineManager.Instance.DeltaTime;
+        return coroutines;
+    }
 
-        public static double DeltaTimeDouble => CoroutineManager.Instance.DeltaTimeDouble;
+    public static float DeltaTime => CoroutineManager.Instance.DeltaTime;
 
+    public static double DeltaTimeDouble => CoroutineManager.Instance.DeltaTimeDouble;
 
-        public static void Run(CoroutineBase coroutine)
-            => CoroutineManager.Instance.StartCoroutine(coroutine);
+    public static void Run(CoroutineBase coroutine) {
+        CoroutineManager.Instance.StartCoroutine(coroutine);
+    }
 
-        public static Coroutine Run(IEnumerator coroutine)
-        {
-            Coroutine co = new Coroutine(coroutine);
-            CoroutineManager.Instance.StartCoroutine(co);
-            return co;
-        }
+    public static Coroutine Run(IEnumerator coroutine) {
+        Coroutine co = new(coroutine);
+        CoroutineManager.Instance.StartCoroutine(co);
+        return co;
+    }
 
-        public static Coroutine Run(Func<IEnumerator> creator)
-            => Run(creator());
+    public static Coroutine Run(Func<IEnumerator> creator) {
+        return Run(creator());
+    }
 
-        public static Coroutine Run(Func<Coroutine, IEnumerator> creator)
-        {
-            Coroutine coroutine = new Coroutine(creator);
-            CoroutineManager.Instance.StartCoroutine(coroutine);
-            return coroutine;
-        }
+    public static Coroutine Run(Func<Coroutine, IEnumerator> creator) {
+        Coroutine coroutine = new(creator);
+        CoroutineManager.Instance.StartCoroutine(coroutine);
+        return coroutine;
+    }
 
+    public static Coroutine Coroutine(IEnumerator enumerator) {
+        return new(enumerator);
+    }
 
-        public static Coroutine Coroutine(IEnumerator enumerator)
-            => new Coroutine(enumerator);
+    public static Coroutine Coroutine(Func<Coroutine, IEnumerator> creator) {
+        return new(creator);
+    }
 
-        public static Coroutine Coroutine(Func<Coroutine, IEnumerator> creator)
-            => new Coroutine(creator);
+    public static ParallelCoroutine Parallel(params IEnumerator[] enumerators) {
+        return new(GetCoroutines(enumerators));
+    }
 
+    public static ParallelCoroutine Parallel(params CoroutineBase[] coroutines) {
+        return new(coroutines);
+    }
 
-        public static ParallelCoroutine Parallel(params IEnumerator[] enumerators)
-            => new ParallelCoroutine(GetCoroutines(enumerators));
+    public static SequentialCoroutine Sequence(params IEnumerator[] enumerators) {
+        return new(GetCoroutines(enumerators));
+    }
 
-        public static ParallelCoroutine Parallel(params CoroutineBase[] coroutines)
-            => new ParallelCoroutine(coroutines);
+    public static SequentialCoroutine Sequence(params CoroutineBase[] coroutines) {
+        return new(coroutines);
+    }
 
+    public static WaitDelayCoroutine Wait(float delay) {
+        return new(delay);
+    }
 
-        public static SequentialCoroutine Sequence(params IEnumerator[] enumerators)
-            => new SequentialCoroutine(GetCoroutines(enumerators));
+    public static WaitWhileCoroutine WaitWhile(Func<bool> condition) {
+        return new(condition);
+    }
 
-        public static SequentialCoroutine Sequence(params CoroutineBase[] coroutines)
-            => new SequentialCoroutine(coroutines);
+    public static WaitUntilCoroutine WaitUntil(Func<bool> condition) {
+        return new(condition);
+    }
 
+    public static WaitForSignalCoroutine WaitForSignal(GodotObject obj, string signal) {
+        return new(obj, signal);
+    }
 
-        public static WaitDelayCoroutine Wait(float delay)
-            => new WaitDelayCoroutine(delay);
+    public static RepeatCoroutine Repeat(int times, Func<RepeatCoroutine, CoroutineBase> creator) {
+        return new(times, creator);
+    }
 
+    public static RepeatCoroutine Repeat(int times, Func<CoroutineBase> creator) {
+        return new(times, _ => creator());
+    }
 
-        public static WaitWhileCoroutine WaitWhile(Func<Boolean> condition)
-            => new WaitWhileCoroutine(condition);
+    public static RepeatCoroutine Repeat(int times, Func<RepeatCoroutine, IEnumerator> creator) {
+        return new(times, coroutine => new Coroutine(creator(coroutine)));
+    }
 
+    public static RepeatCoroutine Repeat(int times, Func<IEnumerator> creator) {
+        return new(times, _ => new Coroutine(creator()));
+    }
 
-        public static WaitUntilCoroutine WaitUntil(Func<Boolean> condition)
-            => new WaitUntilCoroutine(condition);
+    public static RepeatCoroutine RepeatInfinitely(Func<RepeatCoroutine, CoroutineBase> creator) {
+        return new(-1, creator);
+    }
 
+    public static RepeatCoroutine RepeatInfinitely(Func<CoroutineBase> creator) {
+        return new(-1, _ => creator());
+    }
 
-        public static WaitForSignalCoroutine WaitForSignal(GodotObject obj, string signal)
-            => new WaitForSignalCoroutine(obj, signal);
+    public static RepeatCoroutine RepeatInfinitely(Func<RepeatCoroutine, IEnumerator> creator) {
+        return new(-1, coroutine => new Coroutine(creator(coroutine)));
+    }
 
+    public static RepeatCoroutine RepeatInfinitely(Func<IEnumerator> creator) {
+        return new(-1, _ => new Coroutine(creator()));
+    }
 
+    public static TweenCoroutine Tween(Action<Tween> setupTween) {
+        return new(setupTween);
+    }
 
-        public static RepeatCoroutine Repeat(int times, Func<RepeatCoroutine, CoroutineBase> creator)
-            => new RepeatCoroutine(times, creator);
+    public static AwaitCoroutine<T> Await<T>(Task<T> task) {
+        return new(task);
+    }
 
-        public static RepeatCoroutine Repeat(int times, Func<CoroutineBase> creator)
-            => new RepeatCoroutine(times, coroutine => creator());
-
-        public static RepeatCoroutine Repeat(int times, Func<RepeatCoroutine, IEnumerator> creator)
-            => new RepeatCoroutine(times, coroutine => new Coroutine(creator(coroutine)));
-
-        public static RepeatCoroutine Repeat(int times, Func<IEnumerator> creator)
-            => new RepeatCoroutine(times, coroutine => new Coroutine(creator()));
-
-
-        public static RepeatCoroutine RepeatInfinitely(Func<RepeatCoroutine, CoroutineBase> creator)
-            => new RepeatCoroutine(-1, creator);
-
-        public static RepeatCoroutine RepeatInfinitely(Func<CoroutineBase> creator)
-            => new RepeatCoroutine(-1, coroutine => creator());
-
-        public static RepeatCoroutine RepeatInfinitely(Func<RepeatCoroutine, IEnumerator> creator)
-            => new RepeatCoroutine(-1, coroutine => new Coroutine(creator(coroutine)));
-
-        public static RepeatCoroutine RepeatInfinitely(Func<IEnumerator> creator)
-            => new RepeatCoroutine(-1, coroutine => new Coroutine(creator()));
-
-
-        public static TweenCoroutine Tween(Action<Tween> setupTween)
-            => new TweenCoroutine(setupTween);
-
-
-        public static AwaitCoroutine<T> Await<T>(Task<T> task)
-            => new AwaitCoroutine<T>(task);
-
-        public static AwaitCoroutine Await(Task task)
-            => new AwaitCoroutine(task);
+    public static AwaitCoroutine Await(Task task) {
+        return new(task);
     }
 }
