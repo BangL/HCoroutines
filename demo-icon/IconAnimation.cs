@@ -1,17 +1,16 @@
+namespace HCoroutines.Samples.IconDemo;
+
 using Godot;
 using System.Collections;
 using HCoroutines;
 using System.Threading.Tasks;
 
-public partial class IconAnimation : Node2D
-{
-    public override void _Ready()
-    {
+public partial class IconAnimation : Node2D {
+    public override void _Ready() {
         Co.Run(DoAnimation());
     }
 
-    private IEnumerator DoAnimation()
-    {
+    private IEnumerator DoAnimation() {
         yield return MoveToPosition(new Vector2(0, 0), 2);
 
         yield return FullRotation(2);
@@ -31,22 +30,17 @@ public partial class IconAnimation : Node2D
         QueueFree();
     }
 
-    private CoroutineBase MoveToPosition(Vector2 targetPos, float duration)
-    {
-        return Co.Tween(tween => {
-            tween
+    private CoroutineBase MoveToPosition(Vector2 targetPos, float duration) {
+        return Co.Tween(tween => tween
                 .TweenProperty(this, "position", targetPos, duration)
-                .SetTrans(Tween.TransitionType.Cubic);
-        });
+                .SetTrans(Tween.TransitionType.Cubic));
     }
 
-    private IEnumerator FullRotation(float duration)
-    {
+    private IEnumerator FullRotation(float duration) {
         float angle = 0;
         float speed = 2 * Mathf.Pi / duration;
 
-        while (angle < 2 * Mathf.Pi)
-        {
+        while (angle < 2 * Mathf.Pi) {
             angle += speed * Co.DeltaTime;
             Rotation = angle;
             yield return null;
@@ -54,8 +48,7 @@ public partial class IconAnimation : Node2D
         Rotation = 0;
     }
 
-    private IEnumerator ChangeColor(Color targetColor, float duration)
-    {
+    private IEnumerator ChangeColor(Color targetColor, float duration) {
         // Another way to do a tween
 
         Tween tween = CreateTween();
