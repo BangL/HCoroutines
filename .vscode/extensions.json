@@ -1,0 +1,19 @@
+{
+    "recommendations": [
+        "alfish.godot-files",
+        "christian-kohler.path-intellisense",
+        "davidanson.vscode-markdownlint",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "gurumukhi.selected-lines-count",
+        "jinsihou.diff-tool",
+        "jjkim.gdscript",
+        "josefpihrt-vscode.roslynator",
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ryu1kn.partial-diff",
+        "selcukermaya.se-csproj-extensions",
+        "streetsidesoftware.code-spell-checker",
+        "visualstudioexptteam.vscodeintellicode"
+    ]
+}

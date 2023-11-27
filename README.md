@@ -24,18 +24,17 @@ HCoroutines implements this concept in an efficient and optimised way.
 ## Example
 
 ```csharp
-using Godot;
-using System;
 using System.Collections;
 using System.Threading.Tasks;
-
-// Import the library.
+using Godot;
 using HCoroutines;
 
 public partial class Demo : Node2D {
+    /// <summary>
+    /// Spawn a new coroutine that is managed by
+    /// the default CoroutineManager.
+    /// </summary>
     public override void _Ready() {
-        // Spawn a new coroutine that is managed by
-        // the default CoroutineManager.
         Co.Run(PlayAnimation());
     }
 
@@ -55,25 +54,21 @@ public partial class Demo : Node2D {
         // The parallel coroutine waits until all of its
         // sub-coroutines have finished.
         yield return Co.Parallel(
-            Co.Coroutine(GoTo(new Vector2(0, 0), 2)),
-            Co.Coroutine(Turn(1))
+          Co.Coroutine(GoTo(new Vector2(0, 0), 2)),
+          Co.Coroutine(Turn(1))
         );
 
         // Await an async task that waits for 100ms
         yield return Co.Await(Task.Delay(100));
 
         // Await and use the result of an async task
-        var fetch = Co.Await(FetchNumber());
+        AwaitCoroutine<int> fetch = Co.Await(FetchNumber());
         yield return fetch;
         int number = fetch.Task.Result;
 
         // Wait for a tween to animate some properties.
-        yield return Co.Tween(
-            tween => {
-                // Change the modulate color over two seconds.
-                tween.TweenProperty(this, "modulate", new Color(1, 0, 0), 2);
-            }
-        );
+        // Change the modulate color over two seconds.
+        yield return Co.Tween(tween => tween.TweenProperty(this, "modulate", new Color(1, 0, 0), 2));
 
         // Waits for a signal to be emitted before continuing.
         yield return Co.WaitForSignal(this, "some_signal");
@@ -90,7 +85,7 @@ public partial class Demo : Node2D {
     }
 
     private IEnumerator Turn(float duration) {
-        float fullRotation = 2 * Mathf.Pi;
+        const float fullRotation = 2 * Mathf.Pi;
         float angularSpeed = fullRotation / duration;
         float angle = 0;
 
@@ -110,30 +105,11 @@ public partial class Demo : Node2D {
 
 For a complete working example, you can see the demo scene.
 
-## Installation
-
-### Manually (Release Zip)
-
-1. Go to the Releases page and download the latest version of this library
-
-2. Unzip the files and copy them into your `./addons/` folder of your Godot project
-
-### As Git Submodule
-
-1. Click on Code (the green button on top of this page) and then copy one of the Clone URL's (https, ssh or github cli)
-
-2. go into your local repo and add it as submodule in `./addons/`:
-
-```sh
-mkdir -p addons
-git submodule add https://github.com/BangL/HCoroutines.git ./addons/
-```
-
-or similar (depending on your git client)
-
 ## Setup (! Important !)
 
 In order for the coroutines to be automatically managed and updated each frame, some helper scripts have to be loaded for each scene: Simply go to <kbd>Project</kbd>/<kbd>Project Settings...</kbd> and select the <kbd>AutoLoad</kbd> tab. Then select the path to the `./addons/HCoroutines/CoroutineManager.tscn` file and press <kbd>Add</kbd>.
+
+![](./docs/AutoLoad.png)
 
 ## Feature overview
 

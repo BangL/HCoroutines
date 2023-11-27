@@ -1,0 +1,59 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "🕹 Debug Game",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT}",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false
+      },
+      {
+        "name": "🎭 Debug Current Scene",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT}",
+        "args": [
+          "${fileDirname}/${fileBasenameNoExtension}.tscn"
+        ],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false
+      },
+      {
+        "name": "🧪 Debug Tests",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT}",
+        "args": [
+          "--run-tests",
+          "--quit-on-finish"
+        ],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false
+      },
+      {
+        "name": "🔬 Debug Current Test",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT}",
+        "args": [
+          "--run-tests=${fileBasenameNoExtension}",
+          "--quit-on-finish"
+        ],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false
+      },
+      {
+        "name": ".NET Core Attach",
+        "type": "coreclr",
+        "request": "attach"
+      }
+    ]
+  }
+  
