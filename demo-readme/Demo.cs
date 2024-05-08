@@ -3,7 +3,6 @@ namespace HCoroutines.Samples.ReadmeDemo;
 using System.Collections;
 using System.Threading.Tasks;
 using Godot;
-using HCoroutines;
 
 public partial class Demo : Node2D {
     /// <summary>
