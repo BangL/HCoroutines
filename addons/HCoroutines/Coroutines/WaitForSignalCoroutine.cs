@@ -1,7 +1,7 @@
 namespace HCoroutines;
 
 using Godot;
-using HCoroutines.Util;
+using Util;
 
 /// <summary>
 /// Waits until a certain signal has been fired.

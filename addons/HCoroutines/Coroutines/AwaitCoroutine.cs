@@ -15,21 +15,11 @@ public class AwaitCoroutine<T> : CoroutineBase {
         Task = task;
     }
 
-    private void TryEnd() {
-        if (Task.IsCompleted) {
-            Kill();
-        }
-    }
-
     public override void OnEnter() {
-        TryEnd();
-        if (IsAlive) {
-            ResumeUpdates();
-        }
-    }
-
-    public override void Update() {
-        TryEnd();
+        // As the CoroutineManager class is not thread safe, ensure that Kill()
+        // is executed on the main Godot thread.
+        TaskScheduler godotTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+        Task.ContinueWith(_ => Kill(), godotTaskScheduler);
     }
 }
 
@@ -45,18 +35,10 @@ public class AwaitCoroutine : CoroutineBase {
         Task = task;
     }
 
-    private void TryEnd() {
-        if (Task.IsCompleted) {
-            Kill();
-        }
-    }
-
     public override void OnEnter() {
-        base.OnEnter();
-        TryEnd();
-    }
-
-    public override void Update() {
-        TryEnd();
+        // As the CoroutineManager class is not thread safe, ensure that Kill()
+        // is executed on the main Godot thread.
+        TaskScheduler godotTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+        Task.ContinueWith(_ => Kill(), godotTaskScheduler);
     }
 }

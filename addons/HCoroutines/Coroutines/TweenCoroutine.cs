@@ -2,7 +2,7 @@ namespace HCoroutines;
 
 using System;
 using Godot;
-using HCoroutines.Util;
+using Util;
 
 /// <summary>
 /// A coroutine that manages a tween instance.
