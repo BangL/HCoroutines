@@ -1,6 +1,6 @@
 # HCoroutines
 
-![Godot 4.2.0](https://img.shields.io/badge/Godot-4.2.0-blue?logo=godot-engine&logoColor=white&style=for-the-badge)
+![Godot 4.2.2](https://img.shields.io/badge/Godot-4.2.2-blue?logo=godot-engine&logoColor=white&style=for-the-badge)
 ![CSharp](https://img.shields.io/badge/Godot-C%23-green?logo=csharp&style=for-the-badge)
 ![MIT License](https://img.shields.io/github/license/BangL/HCoroutines?style=for-the-badge)
 ![Release](https://img.shields.io/github/v/release/BangL/HCoroutines?style=for-the-badge)

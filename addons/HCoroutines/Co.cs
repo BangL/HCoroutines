@@ -1,4 +1,4 @@
-// Hierarchical Coroutines v2.0.1 for Godot
+// Hierarchical Coroutines v2.0.2 for Godot
 // by @Inspiaaa, @BangL
 
 namespace HCoroutines;
